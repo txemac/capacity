@@ -1,6 +1,6 @@
 # Makefile
 
-.PHONY: help install test pre-commit-install pre-commit clean
+.PHONY: help install test pre-commit-install pre-commit run-producer clean
 
 MODEL_ID ?= google/bert_uncased_L-2_H-128_A-2
 
@@ -11,6 +11,7 @@ help:
 	@echo "  make pre-commit-install   - Install pre-commit hooks"
 	@echo "  make pre-commit           - Run linters and formatters"
 	@echo "  make clean                - Remove temporary files"
+	@echo "  make run-producer         - Run the producer"
 
 install:
 	uv sync
@@ -26,3 +27,6 @@ pre-commit:
 
 clean:
 	rm -rf __pycache__ .pytest_cache
+
+run-producer:
+	uv run python producer/src/main.py --model "$(MODEL_ID)"
