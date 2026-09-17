@@ -4,6 +4,7 @@ import base64
 import settings
 from downloading import download_model_file
 from encryption import decrypt_file
+from packaging import extract_file
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -35,6 +36,10 @@ def main() -> None:
     path_zip_file = path_encrypted_file.with_suffix("")
     path_zip_file.write_bytes(file)
     print(f"Model zip decrypted file downloaded at: {path_zip_file}")
+
+    # extract file
+    path_model = extract_file(path_zip_file=path_zip_file)
+    print(f"Model extracted file downloaded at: {path_model}")
 
 
 if __name__ == "__main__":

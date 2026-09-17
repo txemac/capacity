@@ -22,8 +22,8 @@ def test_create_zip_file_contains_source_files(
     with tarfile.open(path_zip, mode="r:gz") as archive:
         members = archive.getnames()
 
-    assert f"{path_model.name}/config.json" in members
-    assert f"{path_model.name}/model.txt" in members
+    assert "config.json" in members
+    assert "model.txt" in members
 
 
 def test_create_zip_file_preserves_file_content(
@@ -37,6 +37,6 @@ def test_create_zip_file_preserves_file_content(
     with tarfile.open(path_zip, mode="r:gz") as archive:
         archive.extractall(extraction_directory)
 
-    extracted_content = (extraction_directory / path_model.name / "model.txt").read_text()
+    extracted_content = (extraction_directory / "model.txt").read_text()
 
     assert extracted_content == original_content
