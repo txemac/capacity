@@ -1,9 +1,9 @@
 import argparse
+import base64
 from pathlib import Path
 
 import settings
 from encryption import encrypt_file
-from encryption import generate_key
 from model import download_model
 from packaging import create_zip_file
 from publishing import publish_artifact
@@ -39,7 +39,7 @@ def main() -> None:
     print(f"Zip created at: {path_zip}")
 
     # encrypt zip file
-    key = generate_key()
+    key = base64.b64decode(settings.KEY_BASE64)
     path_enc = encrypt_file(key=key, path_zip=path_zip)
     print(f"Encrypted artifact created at: {path_enc}")
 

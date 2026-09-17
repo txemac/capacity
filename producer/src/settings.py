@@ -21,6 +21,7 @@ def get_required_setting(
 # required environment variables
 HF_TOKEN = get_required_setting("HF_TOKEN")
 HF_REPO_ID = get_required_setting("HF_REPO_ID")
+KEY_BASE64 = get_required_setting("KEY_BASE64")
 
 # app setting
 PRODUCER_DIRECTORY = Path(__file__).parents[1]

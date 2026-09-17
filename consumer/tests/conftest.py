@@ -14,24 +14,24 @@ def test_settings(
 
 
 @pytest.fixture
-def model_file() -> str:
-    return "artifact_example.tar.gz.enc"
+def example_encrypted_file() -> str:
+    return "model_example.tar.gz.enc"
 
 
 @pytest.fixture
-def path_model_file(
-    model_file: str,
+def path_example_encrypted_file(
+    example_encrypted_file: str,
 ) -> Path:
-    return Path(__file__).parent / model_file
+    return Path(__file__).parent / "files" / example_encrypted_file
 
 
 @pytest.fixture
 def mock_download_model_file(
-    path_model_file: Path,
+    path_example_encrypted_file: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> Path:
     def download_artifact_mock(*args: object, **kwargs: object) -> str:
-        return str(path_model_file)
+        return str(path_example_encrypted_file)
 
     monkeypatch.setattr("downloading.hf_hub_download", download_artifact_mock)
-    return path_model_file
+    return path_example_encrypted_file

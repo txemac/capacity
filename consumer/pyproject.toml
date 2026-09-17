@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "Consumer application for the confidential ML model distribution PoC"
 requires-python = ">=3.14"
 dependencies = [
+    "cryptography>=50.0.1",
     "huggingface-hub>=1.32.0",
     "python-dotenv>=1.2.3",
 ]
