@@ -4,25 +4,59 @@ from unittest.mock import MagicMock
 from unittest.mock import patch
 
 import pytest
+
+import settings
 from encryption import encrypt_file
 from encryption import generate_key
+from packaging import create_zip_file
 
 
-@pytest.fixture
-def encrypted_file(tmp_path: Path) -> tuple[Path, Path, bytes]:
-    input_path = tmp_path / "model.tar.gz"
-    output_path = tmp_path / "model.tar.gz.enc"
-    key = generate_key()
+@pytest.fixture(autouse=True)
+def test_settings(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(settings, "OUTPUT_DIRECTORY", tmp_path)
 
-    input_path.write_bytes(b"test model content")
 
-    encrypt_file(
-        input_path=input_path,
-        output_path=output_path,
-        key=key,
-    )
+@pytest.fixture(scope="session")
+def model_id() -> str:
+    return "capacity/test-model"
 
-    return input_path, output_path, key
+
+@pytest.fixture()
+def path_model(
+    model_id: str,
+) -> Path:
+    model_name = model_id.replace("/", "-")
+
+    path_model = Path(settings.OUTPUT_DIRECTORY / model_name)
+
+    path_model.mkdir()
+    (path_model / "config.json").write_text('{"model": "test"}')
+    (path_model / "model.txt").write_text("test model")
+
+    return path_model
+
+
+@pytest.fixture()
+def path_zip(
+    path_model: Path,
+) -> Path:
+    return create_zip_file(path_model=path_model)
+
+
+@pytest.fixture()
+def key() -> bytes:
+    return generate_key()
+
+
+@pytest.fixture()
+def path_enc(
+    path_zip: Path,
+    key: bytes,
+) -> Path:
+    return encrypt_file(key=key, path_zip=path_zip)
 
 
 @pytest.fixture

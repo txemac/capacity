@@ -2,13 +2,15 @@ import tarfile
 from pathlib import Path
 
 
-def create_archive(
-    source_directory: Path,
-    output_path: Path,
-) -> None:
+def create_zip_file(
+    path_model: Path,
+) -> Path:
     """Create a gzip-compressed tar archive from a directory."""
-    with tarfile.open(output_path, mode="w:gz") as archive:
+    path_zip = path_model.with_suffix(".tar.gz")
+    with tarfile.open(path_zip, mode="w:gz") as archive:
         archive.add(
-            source_directory,
-            arcname=source_directory.name,
+            path_model,
+            arcname=path_model.name,
         )
+
+    return path_zip

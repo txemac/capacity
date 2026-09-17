@@ -1,16 +1,12 @@
 import argparse
 from pathlib import Path
 
+import settings
 from encryption import encrypt_file
 from encryption import generate_key
 from model import download_model
-from packaging import create_archive
-
-OUTPUT_DIRECTORY = Path(__file__).parents[1] / "output"
-MODEL_DIRECTORY = OUTPUT_DIRECTORY / "model"
-ARCHIVE_PATH = OUTPUT_DIRECTORY / "model.tar.gz"
-ENCRYPTED_PATH = OUTPUT_DIRECTORY / "model.tar.gz.enc"
-KEY_PATH = OUTPUT_DIRECTORY / "encryption.key"
+from packaging import create_zip_file
+from publishing import publish_artifact
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -28,30 +24,28 @@ def parse_arguments() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_arguments()
+    model_name = args.model.replace("/", "-")
 
-    OUTPUT_DIRECTORY.mkdir(parents=True, exist_ok=True)
+    # create output dir
+    settings.OUTPUT_DIRECTORY.mkdir(parents=True, exist_ok=True)
 
-    download_model(
-        model_id=args.model,
-        output_directory=MODEL_DIRECTORY,
-    )
+    # download model
+    path_model = Path(settings.OUTPUT_DIRECTORY / model_name)
+    download_model(model_id=args.model, path_model=path_model)
+    print(f"Model downloaded at: {path_model}")
 
-    create_archive(
-        source_directory=MODEL_DIRECTORY,
-        output_path=ARCHIVE_PATH,
-    )
+    # zip folder
+    path_zip = create_zip_file(path_model=path_model)
+    print(f"Zip created at: {path_zip}")
 
+    # encrypt zip file
     key = generate_key()
+    path_enc = encrypt_file(key=key, path_zip=path_zip)
+    print(f"Encrypted artifact created at: {path_enc}")
 
-    encrypt_file(
-        input_path=ARCHIVE_PATH,
-        output_path=ENCRYPTED_PATH,
-        key=key,
-    )
-
-    KEY_PATH.write_bytes(key)
-
-    print(f"Encrypted artifact created at: {ENCRYPTED_PATH}")
+    # upload encrypted file
+    publish_artifact(path_enc=path_enc)
+    print(f"File uploaded to: {settings.HF_REPO_ID}")
 
 
 if __name__ == "__main__":

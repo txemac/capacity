@@ -1,73 +1,42 @@
 import tarfile
 from pathlib import Path
 
-from packaging import create_archive
+from packaging import create_zip_file
 
 
-def test_create_archive_creates_archive(
-    tmp_path: Path,
+def test_create_zip_file_creates_archive(
+    path_model: Path,
 ) -> None:
-    source_directory = tmp_path / "model"
-    output_path = tmp_path / "model.tar.gz"
+    path_zip = create_zip_file(path_model=path_model)
 
-    source_directory.mkdir()
-    (source_directory / "config.json").write_text('{"model": "test"}')
-    (source_directory / "model.txt").write_text("test model")
-
-    create_archive(
-        source_directory=source_directory,
-        output_path=output_path,
-    )
-
-    assert output_path.exists()
-    assert output_path.is_file()
-    assert tarfile.is_tarfile(output_path)
+    assert path_zip.exists()
+    assert path_zip.is_file()
+    assert tarfile.is_tarfile(path_zip)
 
 
-def test_create_archive_contains_source_files(
-    tmp_path: Path,
+def test_create_zip_file_contains_source_files(
+    path_model: Path,
 ) -> None:
-    source_directory = tmp_path / "model"
-    output_path = tmp_path / "model.tar.gz"
+    path_zip = create_zip_file(path_model=path_model)
 
-    source_directory.mkdir()
-
-    (source_directory / "config.json").write_text('{"model": "test"}')
-    (source_directory / "model.txt").write_text("test model")
-
-    create_archive(
-        source_directory=source_directory,
-        output_path=output_path,
-    )
-
-    with tarfile.open(output_path, mode="r:gz") as archive:
+    with tarfile.open(path_zip, mode="r:gz") as archive:
         members = archive.getnames()
 
-    assert "model/config.json" in members
-    assert "model/model.txt" in members
+    assert f"{path_model.name}/config.json" in members
+    assert f"{path_model.name}/model.txt" in members
 
 
-def test_create_archive_preserves_file_content(
-    tmp_path: Path,
+def test_create_zip_file_preserves_file_content(
+    path_model: Path,
 ) -> None:
-    source_directory = tmp_path / "model"
-    output_path = tmp_path / "model.tar.gz"
+    original_content = (path_model / "model.txt").read_text()
+    path_zip = create_zip_file(path_model=path_model)
 
-    source_directory.mkdir()
+    extraction_directory = path_model.parent / "extracted"
 
-    original_content = "test model content"
-    (source_directory / "model.txt").write_text(original_content)
-
-    create_archive(
-        source_directory=source_directory,
-        output_path=output_path,
-    )
-
-    extraction_directory = tmp_path / "extracted"
-
-    with tarfile.open(output_path, mode="r:gz") as archive:
+    with tarfile.open(path_zip, mode="r:gz") as archive:
         archive.extractall(extraction_directory)
 
-    extracted_content = (extraction_directory / "model" / "model.txt").read_text()
+    extracted_content = (extraction_directory / path_model.name / "model.txt").read_text()
 
     assert extracted_content == original_content

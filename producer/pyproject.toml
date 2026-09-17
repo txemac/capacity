@@ -1,12 +1,13 @@
 [project]
-name = "capacity"
+name = "capacity-producer"
 version = "0.1.0"
-description = "Confidential ML Model Distribution PoC"
+description = "Producer application for secure ML model packaging and distribution"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
     "cryptography>=50.0.1",
     "huggingface-hub>=1.31.0",
+    "python-dotenv>=1.2.3",
 ]
 
 [dependency-groups]
@@ -33,5 +34,5 @@ convention = "pep257"
 
 [tool.pytest.ini_options]
 pythonpath = [
-    "producer/src",
+    "src",
 ]
