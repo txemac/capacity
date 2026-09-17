@@ -1,0 +1,36 @@
+[project]
+name = "capacity-consumer"
+version = "0.1.0"
+description = "Consumer application for the confidential ML model distribution PoC"
+requires-python = ">=3.14"
+dependencies = [
+    "huggingface-hub>=1.32.0",
+    "python-dotenv>=1.2.3",
+]
+
+[dependency-groups]
+dev = [
+    "pytest==9.1.1",
+    "pre-commit==4.6.2",
+]
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.format]
+quote-style = "double"
+skip-magic-trailing-comma = false
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+
+[tool.ruff.lint.isort]
+force-single-line = true
+
+[tool.ruff.lint.pydocstyle]
+convention = "pep257"
+
+[tool.pytest.ini_options]
+pythonpath = [
+    "src",
+]
