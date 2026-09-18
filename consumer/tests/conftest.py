@@ -14,8 +14,15 @@ def test_settings(
 
 
 @pytest.fixture
-def example_encrypted_file() -> str:
-    return "model_example.tar.gz.enc"
+def example_model_name() -> str:
+    return "model_example"
+
+
+@pytest.fixture
+def example_encrypted_file(
+    example_model_name: str,
+) -> str:
+    return f"{example_model_name}.tar.gz.enc"
 
 
 @pytest.fixture
@@ -23,6 +30,14 @@ def path_example_encrypted_file(
     example_encrypted_file: str,
 ) -> Path:
     return Path(__file__).parent / "files" / example_encrypted_file
+
+
+@pytest.fixture
+def path_example_model(
+    example_model_name: str,
+    path_example_encrypted_file: str,
+) -> Path:
+    return Path(__file__).parent / "files" / example_model_name
 
 
 @pytest.fixture

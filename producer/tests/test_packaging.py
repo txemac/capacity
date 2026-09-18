@@ -1,7 +1,7 @@
 import tarfile
 from pathlib import Path
 
-from packaging import create_zip_file
+from zip import create_zip_file
 
 
 def test_create_zip_file_creates_archive(

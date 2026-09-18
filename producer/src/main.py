@@ -5,8 +5,8 @@ from pathlib import Path
 import settings
 from encryption import encrypt_file
 from model import download_model
-from packaging import create_zip_file
 from publishing import publish_artifact
+from zip import create_zip_file
 
 
 def parse_arguments() -> argparse.Namespace:

@@ -8,7 +8,7 @@ import pytest
 import settings
 from encryption import encrypt_file
 from encryption import generate_key
-from packaging import create_zip_file
+from zip import create_zip_file
 
 
 @pytest.fixture(autouse=True)
