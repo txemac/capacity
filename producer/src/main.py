@@ -37,7 +37,11 @@ def main() -> None:
 
     # download model
     path_model = Path(settings.OUTPUT_DIRECTORY / model_name)
-    download_model(model_id=args.model, path_model=path_model)
+    try:
+        download_model(model_id=args.model, path_model=path_model)
+    except ValueError as error:
+        print(f"ERROR: {error}")
+        raise SystemExit(1)
     print(f"Model downloaded at: {path_model}")
 
     # zip folder

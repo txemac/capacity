@@ -27,11 +27,14 @@ def main() -> None:
     settings.OUTPUT_DIRECTORY.mkdir(parents=True, exist_ok=True)
 
     # download model encrypted file
-    path_encrypted_file = download_model_file(model_file=args.model)
+    try:
+        path_encrypted_file = download_model_file(model_file=args.model)
+    except ValueError as error:
+        print(f"ERROR: {error}")
+        raise SystemExit(1)
     print(f"Model encrypted file downloaded at: {path_encrypted_file}")
 
     # zip decrypted file
-
     file = decrypt_file(key=settings.get_encryption_key(), path_encrypted_file=path_encrypted_file)
     path_zip_file = path_encrypted_file.with_suffix("")
     path_zip_file.write_bytes(file)
