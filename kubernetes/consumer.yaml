@@ -1,0 +1,38 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  generateName: capacity-consumer-
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        app: capacity-consumer
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: consumer
+          image: capacity-consumer:latest
+          imagePullPolicy: Never
+          command:
+            - python
+            - src/main.py
+          args:
+            - --model
+            - ${MODEL_FILE}
+          env:
+            - name: HF_REPO_ID
+              value: "txemac/capacity"
+            - name: HF_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: huggingface-token
+                  key: HF_TOKEN
+          volumeMounts:
+            - name: model-encryption-key
+              mountPath: /run/secrets/model-encryption-key
+              readOnly: true
+      volumes:
+        - name: model-encryption-key
+          secret:
+            secretName: model-encryption-key

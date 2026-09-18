@@ -1,5 +1,4 @@
 import argparse
-import base64
 
 import settings
 from downloading import download_model_file
@@ -32,8 +31,8 @@ def main() -> None:
     print(f"Model encrypted file downloaded at: {path_encrypted_file}")
 
     # zip decrypted file
-    key = base64.b64decode(settings.KEY_BASE64)
-    file = decrypt_file(key=key, path_encrypted_file=path_encrypted_file)
+
+    file = decrypt_file(key=settings.get_encryption_key(), path_encrypted_file=path_encrypted_file)
     path_zip_file = path_encrypted_file.with_suffix("")
     path_zip_file.write_bytes(file)
     print(f"Model zip decrypted file downloaded at: {path_zip_file}")

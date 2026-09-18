@@ -1,4 +1,3 @@
-import base64
 from pathlib import Path
 
 import pytest
@@ -12,8 +11,10 @@ from encryption import decrypt_file
 def test_decrypt_file(
     path_example_encrypted_file: Path,
 ) -> None:
-    key = base64.b64decode(settings.KEY_BASE64)
-    file = decrypt_file(key=key, path_encrypted_file=path_example_encrypted_file)
+    file = decrypt_file(
+        key=settings.get_encryption_key(),
+        path_encrypted_file=path_example_encrypted_file,
+    )
 
     assert isinstance(file, bytes)
 

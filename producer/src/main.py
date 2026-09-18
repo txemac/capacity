@@ -4,6 +4,7 @@ from pathlib import Path
 
 import settings
 from encryption import encrypt_file
+from encryption import generate_key
 from model import download_model
 from publishing import publish_artifact
 from zip import create_zip_file
@@ -17,6 +18,11 @@ def parse_arguments() -> argparse.Namespace:
         "--model",
         required=True,
         help="Hugging Face model ID",
+    )
+    parser.add_argument(
+        "--generate-key",
+        action="store_true",
+        help="Generate a new encryption key instead of using KEY_BASE64",
     )
 
     return parser.parse_args()
@@ -39,9 +45,14 @@ def main() -> None:
     print(f"Zip created at: {path_zip}")
 
     # encrypt zip file
-    key = base64.b64decode(settings.KEY_BASE64)
+    key = generate_key() if args.generate_key else settings.get_encryption_key()
     path_enc = encrypt_file(key=key, path_zip=path_zip)
     print(f"Encrypted artifact created at: {path_enc}")
+
+    if args.generate_key:
+        path_key = settings.OUTPUT_DIRECTORY / ".key"
+        path_key.write_text(base64.b64encode(key).decode("ascii"))
+        print(f"Key created at: {path_key}")
 
     # upload encrypted file
     publish_artifact(path_enc=path_enc)
