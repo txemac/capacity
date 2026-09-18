@@ -20,3 +20,19 @@ def download_model_file(
         raise ValueError(f"Model file '{model_file}' not in repository '{settings.HF_REPO_ID}'.") from error
 
     return Path(path_model)
+
+
+def download_sig_file(
+    sig_file: str,
+) -> Path:
+    """Download signature file from Hugging Face Hub."""
+    try:
+        path_signature = hf_hub_download(
+            repo_id=settings.HF_REPO_ID,
+            filename=sig_file,
+            local_dir=settings.OUTPUT_DIRECTORY,
+        )
+    except RemoteEntryNotFoundError as error:
+        raise ValueError(f"Signature '{sig_file}' not in repository '{settings.HF_REPO_ID}'.") from error
+
+    return Path(path_signature)

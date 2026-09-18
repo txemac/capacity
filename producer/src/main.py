@@ -7,6 +7,8 @@ from encryption import encrypt_file
 from encryption import generate_key
 from model import download_model
 from publishing import publish_artifact
+from signing import generate_key_pair
+from signing import sign_file
 from zip import create_zip_file
 
 
@@ -58,9 +60,23 @@ def main() -> None:
         path_key.write_text(base64.b64encode(key).decode("ascii"))
         print(f"Key created at: {path_key}")
 
-    # upload encrypted file
+    # generate signing key pair
+    path_private_key, path_public_key = generate_key_pair()
+    print(f"Signing private key available at: {path_private_key}")
+    print(f"Signing public key available at: {path_public_key}")
+
+    # sign encrypted file
+    path_sig = sign_file(
+        path_private_key=path_private_key,
+        path_enc=path_enc,
+    )
+    print(f"Signature created at: {path_sig}")
+
+    # upload encrypted file and signature
     publish_artifact(path_enc=path_enc)
-    print(f"File uploaded to: {settings.HF_REPO_ID}")
+    publish_artifact(path_enc=path_sig)
+
+    print(f"Files uploaded to: {settings.HF_REPO_ID}")
 
 
 if __name__ == "__main__":

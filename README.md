@@ -786,3 +786,120 @@ The project uses Ruff for linting and formatting.
 
 Changes should keep Producer and Consumer responsibilities clearly separated and avoid adding
 complexity that is not required by the current Layer 1 implementation.
+
+# Layer 2 ... Model Signing
+
+Layer 2 adds asymmetric signing to the Layer 1 distribution flow.
+
+The Producer generates an Ed25519 signing key pair and uses the private key to sign the
+encrypted model artifact. The Consumer receives the corresponding public key as trusted
+configuration and verifies the signature before decrypting the artifact.
+
+The resulting flow is:
+
+```text
+Producer
+  │
+  ├── Download model from Hugging Face Hub
+  │
+  ├── Package model directory into a tar.gz archive
+  │
+  ├── Encrypt archive with AES-256-GCM
+  │
+  ├── Generate Ed25519 signing key pair
+  │
+  ├── Sign the encrypted artifact
+  │
+  └── Upload encrypted artifact + signature to Hugging Face Hub
+  │
+  ▼
+Hugging Face Hub
+  │
+  ├── model.tar.gz.enc
+  └── model.tar.gz.enc.sig
+
+Kubernetes
+  │
+  ├── AES encryption key → Kubernetes Secret
+  └── Ed25519 public key → Kubernetes ConfigMap
+  │
+  ▼
+Consumer
+  │
+  ├── Download encrypted artifact
+  ├── Download signature
+  ├── Verify signature using trusted public key
+  │
+  ├── If verification fails → abort
+  │
+  ├── Decrypt artifact using AES key
+  ├── Extract model
+  └── Load model
+```
+
+## Why Ed25519?
+
+Ed25519 was selected for the signing mechanism because it provides a modern asymmetric digital
+signature algorithm with small keys and signatures and a simple API for signing and verification.
+
+The private key is only used by the Producer and must remain private. The public key is not
+secret and can be distributed to the Consumer as trusted configuration.
+
+The signing key files are named using the model name. This is an operational convention used to
+make the relationship between a generated key pair and its model explicit and reduce the risk of
+mixing keys between different model artifacts. The model name in the filename does not make the
+cryptographic key intrinsically unique to that model.
+
+## Why sign the encrypted artifact?
+
+The signature is generated over the encrypted `.tar.gz.enc` file rather than the plaintext model.
+This means the Consumer verifies the exact artifact that it is going to decrypt.
+
+AES-256-GCM already provides integrity protection for the ciphertext. The additional Ed25519
+signature serves a different purpose: it allows the Consumer to authenticate the artifact against
+a trusted Producer public key before performing decryption.
+
+This gives the Consumer the following order of operations:
+
+```text
+Download → Verify signature → Decrypt → Extract → Load
+```
+
+Decryption is therefore never attempted when signature verification fails.
+
+## Public key trust
+
+The public signing key is distributed separately from the model artifact through a Kubernetes
+ConfigMap.
+
+The public key is intentionally not downloaded from the same Hugging Face repository as the
+encrypted model and its signature. If the Consumer obtained all three values from the same
+untrusted location, an attacker could potentially replace the artifact, signature, and public
+key together. The public key therefore has to come from a separately trusted configuration
+source.
+
+The private signing key is kept on the Producer side and is not uploaded to Hugging Face or
+mounted into the Consumer Pod.
+
+## Layer 2 verification
+
+The Consumer verifies the Ed25519 signature before calling the decryption logic. A valid
+signature allows the flow to continue. An invalid signature causes the Consumer to terminate
+before decryption and model loading.
+
+The test suite also covers signature tampering by modifying signed content and asserting that
+verification raises `InvalidSignature`.
+
+The complete Kubernetes flow was tested successfully with the selected Hugging Face model. The
+Consumer downloaded the encrypted artifact and its signature, verified the signature, decrypted
+and extracted the archive, and finally loaded the model successfully.
+
+## Layer 2 limitations
+
+The signing public key is currently supplied through a Kubernetes ConfigMap. This provides a
+simple trusted configuration mechanism for the PoC, but it does not provide hardware-backed
+attestation or prove that the Kubernetes node itself is trustworthy.
+
+Those concerns are outside the implemented scope of this PoC and are the type of problem that
+Layer 3, using an attested key retrieval mechanism such as Kata Containers, Confidential
+Containers and Trustee KBS, is intended to address.

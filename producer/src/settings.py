@@ -32,5 +32,8 @@ HF_REPO_ID = get_required_setting("HF_REPO_ID")
 PRODUCER_DIRECTORY = Path(__file__).parents[1]
 OUTPUT_DIRECTORY = PRODUCER_DIRECTORY / "output"
 
+PRIVATE_KEY_FILENAME = "signing-private-key.pem"
+PUBLIC_KEY_FILENAME = "signing-public-key.pem"
+
 KEY_SIZE = 256
 NONCE_SIZE = 12

@@ -33,6 +33,20 @@ def path_example_encrypted_file(
 
 
 @pytest.fixture
+def example_sig_file(
+    example_model_name: str,
+) -> str:
+    return f"{example_model_name}.tar.gz.enc.sig"
+
+
+@pytest.fixture
+def path_example_sig_file(
+    example_sig_file: str,
+) -> Path:
+    return Path(__file__).parent / "files" / example_sig_file
+
+
+@pytest.fixture
 def path_example_model(
     example_model_name: str,
     path_example_encrypted_file: str,

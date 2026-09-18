@@ -28,11 +28,19 @@ spec:
                 secretKeyRef:
                   name: huggingface-token
                   key: HF_TOKEN
+            - name: PUBLIC_KEY_FILE
+              value: "/run/config/signing-public-key.pem"
           volumeMounts:
             - name: model-encryption-key
               mountPath: /run/secrets/model-encryption-key
+              readOnly: true
+            - name: signing-public-key
+              mountPath: /run/config
               readOnly: true
       volumes:
         - name: model-encryption-key
           secret:
             secretName: model-encryption-key
+        - name: signing-public-key
+          configMap:
+            name: signing-public-key

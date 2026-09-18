@@ -36,6 +36,9 @@ HF_REPO_ID = get_required_setting("HF_REPO_ID")
 # Kubernetes Secret
 KEY_FILE = Path("/run/secrets/model-encryption-key/KEY_BASE64")
 
+# signing public key
+PUBLIC_KEY_FILE = Path(get_required_setting("PUBLIC_KEY_FILE"))
+
 # app settings
 CONSUMER_DIRECTORY = Path(__file__).parents[1]
 OUTPUT_DIRECTORY = CONSUMER_DIRECTORY / "output"
